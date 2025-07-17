@@ -8,8 +8,6 @@ import {
 } from "react-icons/fa";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import Picker from "@emoji-mart/react";
-import data from "@emoji-mart/data";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -165,7 +163,7 @@ const ChatWindow = ({ currentUser }) => {
         </div>
         {showEmojiPicker && (
           <div className="absolute bottom-12 left-0 z-10">
-            <Picker data={data} onEmojiSelect={addEmoji} theme="light" />
+            {/* <Picker data={data} onEmojiSelect={addEmoji} theme="light" /> */}
           </div>
         )}
       </div>
