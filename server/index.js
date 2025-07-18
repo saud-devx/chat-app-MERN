@@ -20,9 +20,13 @@ mongoose
 
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173', // Your frontend port
-    methods: ['GET', 'POST'],
-  },
+    origin: [
+      "http://localhost:5173",
+      "https://chat-app-mern-tawny.vercel.app"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 // Basic socket.io handling
@@ -40,7 +44,10 @@ io.on('connection', (socket) => {
 
 // Middleware
 app.use(cors({
-  origin: ["https://chat-app-mern-tawny.vercel.app/login"],
+ origin: [
+    "http://localhost:5173",
+    "https://chat-app-mern-tawny.vercel.app"
+  ],
   credentials: true,
 }));
 
