@@ -4,9 +4,19 @@ const http = require('http');
 const { Server } = require('socket.io');
 const authRoutes = require('./routes/auth');
 const path = require('path');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+
 
 const app = express();
 const server = http.createServer(app);
+
+dotenv.config();
+
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection failed:', err));
 
 const io = new Server(server, {
   cors: {
@@ -29,7 +39,11 @@ io.on('connection', (socket) => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://chat-app-mern-tawny.vercel.app/login"],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
