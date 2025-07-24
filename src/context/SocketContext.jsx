@@ -8,7 +8,7 @@ export const SocketProvider = ({ children }) => {
   const socket = useRef(null);
 
   useEffect(() => {
-    socket.current = io("http://localhost:5000");
+    socket.current = io("https://chat-app-mern-i2ao.onrender.com");
 
     return () => {
       socket.current.disconnect();

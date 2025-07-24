@@ -1,6 +1,6 @@
 // src/services/chatService.js
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:5173'); // backend URL
+const socket = io('https://chat-app-mern-i2ao.onrender.com'); // backend URL
 
 export default socket;

@@ -20,7 +20,7 @@ function RegisterPage() {
     if (avatar) formData.append('avatar', avatar);
 
     try {
-      await axios.post('http://localhost:5000/api/register', formData, {
+      await axios.post('https://chat-app-mern-i2ao.onrender.com/api/register', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 

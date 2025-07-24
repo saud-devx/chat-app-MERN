@@ -19,8 +19,7 @@ const ChatWindow = ({ currentUser }) => {
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const handleLogout = () => {
-    
-      toast.error(data.message || "logout failed");
+      // toast.error(data.message || "logout failed");
       localStorage.removeItem("user");
       navigate("/login");
 
