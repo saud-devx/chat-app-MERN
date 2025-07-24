@@ -14,8 +14,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/uploads': 'http://localhost:5000',
+      '/api': 'https://chat-app-mern-i2ao.onrender.com0',
+      '/uploads': 'https://chat-app-mern-i2ao.onrender.com',
     },
   },
 });
