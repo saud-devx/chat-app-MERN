@@ -33,9 +33,22 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
-  socket.on('send-message', (data) => {
-    socket.broadcast.emit('receive-message', data);
+  // socket.on('send-message', (data) => {
+  //   socket.broadcast.emit('receive-message', data);
+  // });
+  io.on("connection", (socket) => {
+  console.log("New user connected");
+
+  socket.on("joinRoom", ({ senderId, receiverId }) => {
+    const roomId = [senderId, receiverId].sort().join("_");
+    socket.join(roomId);
   });
+
+  socket.on("sendMessage", ({ senderId, receiverId, message }) => {
+    const roomId = [senderId, receiverId].sort().join("_");
+    io.to(roomId).emit("receiveMessage", { senderId, message });
+  });
+});
 
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);

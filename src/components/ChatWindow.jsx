@@ -33,42 +33,70 @@ const ChatWindow = ({ currentUser }) => {
   ]);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    const newMsg = {
-      from: "me",
-      text: input.trim(),
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    setMessages([...messages, newMsg]);
-    setInput("");
+const handleSend = () => {
+  if (!input.trim() || !selectedUser || !socket) return;
+
+  const newMsg = {
+    from: currentUser._id,
+    to: selectedUser._id,
+    text: input.trim(),
+    time: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   };
+
+  // Emit the message via socket
+  socket.emit("sendMessage", newMsg);
+
+  // Update local state
+  setMessages(prev => [...prev, { ...newMsg, from: "me" }]);
+  setInput("");
+};
+
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleSend();
   };
 
-  useEffect(() => {
-    const checkStatus = () => {
-      const lastActive = localStorage.getItem("lastActive");
-      if (!lastActive) return;
+useEffect(() => {
+  if (!currentUser || !selectedUser) return;
 
-      const diffMinutes = Math.floor((Date.now() - Number(lastActive)) / 60000);
-      if (diffMinutes < 1) {
-        setStatus("Online");
-      } else {
-        setStatus(`Last seen ${diffMinutes} min ago`);
-      }
-    };
+  // Emit online presence
+  socket.emit("userOnline", currentUser._id);
 
-    checkStatus();
-    const interval = setInterval(checkStatus, 60000); // check every minute
+  // Check local lastActive fallback
+  const checkLastSeenFallback = () => {
+    const lastActive = localStorage.getItem(`lastActive_${selectedUser._id}`);
+    if (!lastActive) return;
 
-    return () => clearInterval(interval);
-  }, []);
+    const diffMinutes = Math.floor((Date.now() - Number(lastActive)) / 60000);
+    if (diffMinutes < 1) {
+      setStatus("Online");
+    } else {
+      setStatus(`Last seen ${diffMinutes} min ago`);
+    }
+  };
+
+  // Handle real-time status updates
+  const handleStatusUpdate = ({ userId, status }) => {
+    if (userId === selectedUser._id) {
+      setStatus(status === "online" ? "Online" : "Offline");
+    }
+  };
+
+  socket.on("updateUserStatus", handleStatusUpdate);
+
+  // Initial fallback check
+  checkLastSeenFallback();
+
+  const fallbackInterval = setInterval(checkLastSeenFallback, 60000);
+
+  return () => {
+    socket.off("updateUserStatus", handleStatusUpdate);
+    clearInterval(fallbackInterval);
+  };
+}, [currentUser, selectedUser, socket]);
 
   return (
     <div className="flex flex-col h-screen bg-gray-200 items-center justify-center p-2 sm:p-4">
