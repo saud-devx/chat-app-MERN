@@ -12,6 +12,15 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ChatWindow = ({ currentUser }) => {
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  useEffect(() => {
+    // maybe fetch or set selectedUser from props or localStorage
+    const storedSelectedUser = JSON.parse(localStorage.getItem("selectedUser"));
+    if (storedSelectedUser) setSelectedUser(storedSelectedUser);
+  }, []);
+
+  if (!selectedUser) return <div>Select a user to chat with</div>;
   const   user = JSON.parse(localStorage.getItem("user"));
   const getCurrentTime = () => format(new Date(), "hh:mm a");
   const navigate = useNavigate();
