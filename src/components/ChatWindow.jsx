@@ -8,10 +8,16 @@ import {
 } from "react-icons/fa";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ChatWindow = ({ currentUser }) => {
+    if (!selectedUser) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-600 text-xl">
+        Select a user to chat with
+      </div>
+    );
+  }
   const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
