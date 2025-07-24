@@ -1,6 +1,6 @@
+// ChatPage.jsx
 import React, { useEffect, useState } from "react";
-import ChatWindow from "../components/ChatWindow"; // adjust path as needed
-import axios from "axios";
+import ChatWindow from "../components/ChatWindow";
 
 const ChatPage = () => {
   const [currentUser, setCurrentUser] = useState(null);
@@ -9,50 +9,45 @@ const ChatPage = () => {
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setCurrentUser(storedUser);
-      fetchUsers(storedUser._id); // fetch users after setting currentUser
-    }
+    if (storedUser) setCurrentUser(storedUser);
   }, []);
 
-  const fetchUsers = async (currentUserId) => {
-    try {
-      const res = await axios.get("https://chat-app-mern-i2ao.onrender.com/api/users"); // replace with your real endpoint
-      const filteredUsers = res.data.filter((user) => user._id !== currentUserId);
-      setUsers(filteredUsers);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    }
-  };
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("https://chat-app-mern-i2ao.onrender.com/api/users");
+        const data = await res.json();
+        // remove current user from list
+        const filtered = data.filter((u) => u.username !== currentUser?.username);
+        setUsers(filtered);
+      } catch (err) {
+        console.error("Failed to fetch users", err);
+      }
+    };
 
-  if (!currentUser) return <div>Loading...</div>;
+    if (currentUser) fetchUsers();
+  }, [currentUser]);
+
+  if (!currentUser) return null;
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-1/4 border-r bg-white p-4">
+    <div className="flex min-h-screen">
+      <aside className="w-64 bg-white border-r p-4">
         <h2 className="text-lg font-semibold mb-4">Users</h2>
         {users.map((user) => (
           <div
             key={user._id}
-            className="cursor-pointer p-2 hover:bg-gray-200 rounded"
             onClick={() => setSelectedUser(user)}
+            className="cursor-pointer p-2 hover:bg-gray-100 rounded"
           >
-            <div className="flex items-center gap-2">
-              <img
-                src={`/uploads/${user.avatar}`}
-                alt={user.username}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <span>{user.username}</span>
-            </div>
+            {user.username}
           </div>
         ))}
-      </div>
+      </aside>
 
-      <div className="flex-1">
+      <main className="flex-1 bg-gray-100">
         <ChatWindow currentUser={currentUser} selectedUser={selectedUser} />
-
-      </div>
+      </main>
     </div>
   );
 };

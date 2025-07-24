@@ -1,214 +1,70 @@
-import React, { useState, useEffect } from "react";
-import {
-  FaPaperclip,
-  FaSmile,
-  FaCamera,
-  FaPaperPlane,
-  FaPowerOff,
-} from "react-icons/fa";
-import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
+// ChatWindow.jsx
+import React, { useState } from "react";
 
-const ChatWindow = ({ currentUser }) => {
-    if (!selectedUser) {
+const ChatWindow = ({ currentUser, selectedUser }) => {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const newMsg = {
+      from: currentUser.username,
+      to: selectedUser.username,
+      text: input.trim(),
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    setMessages([...messages, newMsg]);
+    setInput("");
+  };
+
+  if (!selectedUser) {
     return (
       <div className="h-full flex items-center justify-center text-gray-600 text-xl">
         Select a user to chat with
       </div>
     );
   }
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  useEffect(() => {
-    // maybe fetch or set selectedUser from props or localStorage
-    const storedSelectedUser = JSON.parse(localStorage.getItem("selectedUser"));
-    if (storedSelectedUser) setSelectedUser(storedSelectedUser);
-  }, []);
-
-  if (!selectedUser) return <div>Select a user to chat with</div>;
-  const   user = JSON.parse(localStorage.getItem("user"));
-  const getCurrentTime = () => format(new Date(), "hh:mm a");
-  const navigate = useNavigate();
-  const [status, setStatus] = useState("online");
-
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const handleLogout = () => {
-      // toast.error(data.message || "logout failed");
-      localStorage.removeItem("user");
-      navigate("/login");
-
-  };
-  const addEmoji = (emoji) => {
-    setInput((prev) => prev + emoji.native);
-  };
-  const [messages, setMessages] = useState([
-    { from: "them", text: "Hey! ", time: getCurrentTime() },
-    { from: "me", text: "Hi soulmate ", time: getCurrentTime() },
-  ]);
-  const [input, setInput] = useState("");
-
-const handleSend = () => {
-  if (!input.trim() || !selectedUser || !socket) return;
-
-  const newMsg = {
-    from: currentUser._id,
-    to: selectedUser._id,
-    text: input.trim(),
-    time: new Date().toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-  };
-
-  // Emit the message via socket
-  socket.emit("sendMessage", newMsg);
-
-  // Update local state
-  setMessages(prev => [...prev, { ...newMsg, from: "me" }]);
-  setInput("");
-};
-
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSend();
-  };
-
-useEffect(() => {
-  if (!currentUser || !selectedUser) return;
-
-  // Emit online presence
-  socket.emit("userOnline", currentUser._id);
-
-  // Check local lastActive fallback
-  const checkLastSeenFallback = () => {
-    const lastActive = localStorage.getItem(`lastActive_${selectedUser._id}`);
-    if (!lastActive) return;
-
-    const diffMinutes = Math.floor((Date.now() - Number(lastActive)) / 60000);
-    if (diffMinutes < 1) {
-      setStatus("Online");
-    } else {
-      setStatus(`Last seen ${diffMinutes} min ago`);
-    }
-  };
-
-  // Handle real-time status updates
-  const handleStatusUpdate = ({ userId, status }) => {
-    if (userId === selectedUser._id) {
-      setStatus(status === "online" ? "Online" : "Offline");
-    }
-  };
-
-  socket.on("updateUserStatus", handleStatusUpdate);
-
-  // Initial fallback check
-  checkLastSeenFallback();
-
-  const fallbackInterval = setInterval(checkLastSeenFallback, 60000);
-
-  return () => {
-    socket.off("updateUserStatus", handleStatusUpdate);
-    clearInterval(fallbackInterval);
-  };
-}, [currentUser, selectedUser, socket]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-200 items-center justify-center p-2 sm:p-4">
-      <div className="w-full max-w-md sm:max-w-xl bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="bg-green-600 text-white px-4 py-3 justify-between flex items-center gap-3 shadow-sm">
-          <img
-           src={`https://chat-app-mern-i2ao.onrender.com/uploads/${user.avatar}`}
+    <div className="h-full flex flex-col p-4">
+      <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+        Chatting with {selectedUser.username}
+      </h2>
 
-            alt="User avatar"
-            className="w-10 h-10 rounded-full object-cover border-2 border-white"
-          />
-          <div>
-            <p className="text-md font-semibold">
-              {currentUser?.username || "Ant-ul-Hayat"}
-            </p>
-            {/* <p className="text-xs text-white/80">online</p> */}
-            <p className="text-xs text-white/80">{status}</p>
+      <div className="flex-1 overflow-y-auto mb-4">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`mb-2 ${
+              msg.from === currentUser.username ? "text-right" : "text-left"
+            }`}
+          >
+            <div className="inline-block bg-white px-4 py-2 rounded shadow">
+              <p>{msg.text}</p>
+              <small className="text-xs text-gray-500">{msg.time}</small>
+            </div>
           </div>
-          {/* Logout button */}
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            className="p-2 rounded-full hover:bg-red-600 transition-colors"
-          >
-            <FaPowerOff className="text-white hover:text-white" size={18} />
-          </button>
-        </div>
+        ))}
+      </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-white">
-          {messages.map((msg, idx) =>
-            msg.from === "me" ? (
-              <div key={idx} className="flex justify-end">
-                <div className="bg-green-100 text-gray-900 rounded-lg px-4 py-2 max-w-xs shadow-sm">
-                  <p className="text-sm">{msg.text}</p>
-                  <span className="text-xs text-gray-400 block text-right">
-                    {msg.time}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div key={idx} className="flex items-start">
-                <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">
-                  {/* AH */}
-                  <img
-                    src={`https://chat-app-mern-i2ao.onrender.com/uploads/${user.avatar}`}
-                    alt="User avatar"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-white"
-                  />
-                </div>
-                <div className="bg-gray-100 text-gray-900 rounded-lg px-4 py-2 max-w-xs shadow-sm">
-                  <p className="text-sm">{msg.text}</p>
-                  <span className="text-xs text-gray-500 block text-right">
-                    {msg.time}
-                  </span>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-
-        {/* Input */}
-        <div className="px-4 py-3 bg-gray-50 border-t flex items-center gap-3">
-          <button className="text-gray-500 hover:text-green-500">
-            <FaPaperclip size={18} />
-          </button>
-          <button
-            className="text-gray-500 hover:text-green-500"
-            onClick={() => setShowEmojiPicker((prev) => !prev)}
-          >
-            <FaSmile size={18} />
-          </button>
-          <button className="text-gray-500 hover:text-green-500">
-            <FaCamera size={18} />
-          </button>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type a message"
-            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
-
-          <button
-            onClick={handleSend}
-            className="text-green-500 hover:text-green-600 transition"
-          >
-            <FaPaperPlane size={20} />
-          </button>
-        </div>
-        {showEmojiPicker && (
-          <div className="absolute bottom-12 left-0 z-10">
-            {/* <Picker data={data} onEmojiSelect={addEmoji} theme="light" /> */}
-          </div>
-        )}
+      <div className="flex">
+        <input
+          className="flex-1 border rounded-l px-4 py-2"
+          placeholder="Type your message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button
+          onClick={handleSend}
+          className="bg-blue-500 text-white px-4 py-2 rounded-r"
+        >
+          Send
+        </button>
       </div>
     </div>
   );
