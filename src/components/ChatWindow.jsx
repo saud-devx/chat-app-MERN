@@ -12,7 +12,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ChatWindow = ({ currentUser }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const   user = JSON.parse(localStorage.getItem("user"));
   const getCurrentTime = () => format(new Date(), "hh:mm a");
   const navigate = useNavigate();
   const [status, setStatus] = useState("online");
@@ -76,7 +76,8 @@ const ChatWindow = ({ currentUser }) => {
         {/* Header */}
         <div className="bg-green-600 text-white px-4 py-3 justify-between flex items-center gap-3 shadow-sm">
           <img
-            src={`/uploads/${user.avatar}`}
+           src={`https://chat-app-mern-i2ao.onrender.com/uploads/${user.avatar}`}
+
             alt="User avatar"
             className="w-10 h-10 rounded-full object-cover border-2 border-white"
           />
