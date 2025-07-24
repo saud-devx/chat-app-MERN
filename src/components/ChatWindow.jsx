@@ -115,7 +115,7 @@ const ChatWindow = ({ currentUser }) => {
                 <div className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold mr-2">
                   {/* AH */}
                   <img
-                    src={`/uploads/${user.avatar}`}
+                    src={`https://chat-app-mern-i2ao.onrender.com/uploads/${user.avatar}`}
                     alt="User avatar"
                     className="w-10 h-10 rounded-full object-cover border-2 border-white"
                   />
